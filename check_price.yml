@@ -1,0 +1,46 @@
+name: Check Cambria Price
+
+on:
+  schedule:
+    # кожні 15 хвилин
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      diagnostic:
+        description: "Діагностичний запуск (показати всі знайдені ціни)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  check-price:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Run price check
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PRICE_INDEX: ${{ vars.PRICE_INDEX }}
+          DIAGNOSTIC: ${{ github.event.inputs.diagnostic }}
+        run: python scrape_price.py
+
+      - name: Save updated price back to the repo
+        run: |
+          git config user.name "cambria-price-bot"
+          git config user.email "actions@github.com"
+          git add last_price.json
+          git diff --staged --quiet || git commit -m "оновлено ціну"
+          git push
