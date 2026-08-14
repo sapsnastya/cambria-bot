@@ -13,7 +13,7 @@ TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 # Після діагностичного запуску встановіть цей індекс на номер
 # правильної ціни зі списку, який бот надішле вам у Telegram.
 # 0 = перше знайдене число, 1 = друге, і т.д.
-PRICE_INDEX = int(os.environ.get("PRICE_INDEX", "0"))
+PRICE_INDEX = int(os.environ.get("PRICE_INDEX") or "0")
 
 # true -> бот лише покаже ВСІ знайдені числа й нічого не збереже
 DIAGNOSTIC = os.environ.get("DIAGNOSTIC", "false").lower() == "true"
